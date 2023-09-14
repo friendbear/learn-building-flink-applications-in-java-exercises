@@ -28,7 +28,7 @@ consumer.properties
 producer.properties
 
 # Exercises folder
-exercises/*
+#exercises/*
 !exercises/exercise.sh
 !exercises/exercise.bat
 
