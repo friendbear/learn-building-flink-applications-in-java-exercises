@@ -2,7 +2,7 @@
 
 mvn clean package
 
-LOCAL_FLINK_PATH=(../flink*/bin/flink)
+LOCAL_FLINK_PATH=($HOME/Apache/flink*/bin/flink)
 GLOBAL_FLINK_PATH=$(which flink)
 FLINK_PATH=""
 
