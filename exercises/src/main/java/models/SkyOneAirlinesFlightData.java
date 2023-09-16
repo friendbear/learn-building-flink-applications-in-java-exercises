@@ -103,4 +103,16 @@ public class SkyOneAirlinesFlightData {
             ", confirmation='" + confirmation + '\'' +
             '}';
     }
+
+    public FlightData toFlightData() {
+        return new FlightData(
+                this.emailAddress
+                ,this.flightDepartureTime
+                ,this.iataDepartureCode
+                ,this.flightArrivalTime
+                ,this.iataArrivalCode
+                ,this.flightNumber
+                ,this.confirmation
+        );
+    }
 }

@@ -121,4 +121,73 @@ public class TestHelpers {
             return skyOne;
         }
     }
+
+    public static class FlightDataBuilder {
+        private String emailAddress;
+        private ZonedDateTime departureTime;
+        private String departureAirportCode;
+        private ZonedDateTime arrivalTime;
+        private String arrivalAirportCode;
+        private String flightNumber;
+        private String confirmationCode;
+
+        public FlightDataBuilder() {
+            emailAddress = generateEmail();
+            departureTime = generateDepartureTime();
+            departureAirportCode = generateAirportCode();
+            arrivalTime = generateArrivalTime(departureTime);
+            arrivalAirportCode = generateAirportCode();
+            flightNumber = "Flight"+random.nextInt(1000);
+            confirmationCode = "Confirmation"+generateString(5);
+        }
+
+        public FlightDataBuilder setEmailAddress(String emailAddress) {
+            this.emailAddress = emailAddress;
+            return this;
+        }
+
+        public FlightDataBuilder setDepartureTime(ZonedDateTime departureTime) {
+            this.departureTime = departureTime;
+            return this;
+        }
+
+        public FlightDataBuilder setDepartureAirportCode(String departureAirportCode) {
+            this.departureAirportCode = departureAirportCode;
+            return this;
+        }
+
+        public FlightDataBuilder setArrivalTime(ZonedDateTime arrivalTime) {
+            this.arrivalTime = arrivalTime;
+            return this;
+        }
+
+        public FlightDataBuilder setArrivalAirportCode(String arrivalAirportCode) {
+            this.arrivalAirportCode = arrivalAirportCode;
+            return this;
+        }
+
+        public FlightDataBuilder setFlightNumber(String flightNumber) {
+            this.flightNumber = flightNumber;
+            return this;
+        }
+
+        public FlightDataBuilder setConfirmationCode(String confirmationCode) {
+            this.confirmationCode = confirmationCode;
+            return this;
+        }
+
+        public FlightData build() {
+            FlightData flightData = new FlightData();
+
+            flightData.setEmailAddress(this.emailAddress);
+            flightData.setDepartureTime(this.departureTime);
+            flightData.setDepartureAirportCode(this.departureAirportCode);
+            flightData.setArrivalTime(this.arrivalTime);
+            flightData.setArrivalAirportCode(this.arrivalAirportCode);
+            flightData.setFlightNumber(this.flightNumber);
+            flightData.setConfirmationCode(this.confirmationCode);
+
+            return flightData;
+        }
+    }
 }

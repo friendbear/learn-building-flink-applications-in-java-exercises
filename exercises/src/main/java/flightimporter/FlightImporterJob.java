@@ -1,5 +1,6 @@
 package flightimporter;
 
+import models.FlightData;
 import models.SkyOneAirlinesFlightData;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.connector.kafka.source.KafkaSource;
@@ -9,10 +10,15 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import java.io.InputStream;
+import java.time.ZonedDateTime;
 import java.util.Properties;
 
 public class FlightImporterJob {
 
+    public static DataStream<FlightData> defineWorkflow(DataStream<SkyOneAirlinesFlightData> skyOneSource) {
+        return skyOneSource.filter(skyOneAirlinesFlightData -> skyOneAirlinesFlightData.getFlightArrivalTime().isAfter(ZonedDateTime.now()))
+                .map(skyOneAirlinesFlightData -> skyOneAirlinesFlightData.toFlightData());
+    }
     public static void main(String[] args) throws Exception {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
@@ -31,7 +37,8 @@ public class FlightImporterJob {
         DataStream<SkyOneAirlinesFlightData> skyOneStream = env
             .fromSource(skyOneSource, WatermarkStrategy.noWatermarks(), "skyone_source");
 
-        skyOneStream.print();
+        DataStream<FlightData>  flightDataStream = defineWorkflow(skyOneStream);
+        flightDataStream.print();
 
         env.execute("FlightImporter");
     }
