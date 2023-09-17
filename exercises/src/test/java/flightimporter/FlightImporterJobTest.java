@@ -2,6 +2,7 @@ package flightimporter;
 
 import models.FlightData;
 import models.SkyOneAirlinesFlightData;
+import models.SunsetAirFlightData;
 import models.TestHelpers;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -49,18 +50,20 @@ class FlightImporterJobTest {
     }
 
     @Test
-    public void defineWorkflow_shouldConvertDataFromOneStreams() throws Exception {
+    public void defineWorkflow_shouldConvertDataFromTwoStreams() throws Exception {
         SkyOneAirlinesFlightData skyOneFlight = new TestHelpers.SkyOneBuilder().build();
+        SunsetAirFlightData sunsetFlight = new TestHelpers.SunsetBuilder().build();
 
         DataStreamSource<SkyOneAirlinesFlightData> skyOneStream = env.fromElements(skyOneFlight);
+        DataStreamSource<SunsetAirFlightData> sunsetStream = env.fromElements(sunsetFlight);
 
         FlightImporterJob
-                .defineWorkflow(skyOneStream)
+                .defineWorkflow(skyOneStream, sunsetStream)
                 .collectAsync(collector);
 
         env.executeAsync();
 
-        assertContains(collector, Arrays.asList(skyOneFlight.toFlightData()));
+        assertContains(collector, Arrays.asList(skyOneFlight.toFlightData(), sunsetFlight.toFlightData()));
     }
 
     @Test
@@ -72,14 +75,22 @@ class FlightImporterJobTest {
                 .setFlightArrivalTime(ZonedDateTime.now().minusSeconds(1))
                 .build();
 
+        SunsetAirFlightData newSunsetFlight = new TestHelpers.SunsetBuilder()
+                .setArrivalTime(ZonedDateTime.now().plusMinutes(1))
+                .build();
+        SunsetAirFlightData oldSunsetFlight = new TestHelpers.SunsetBuilder()
+                .setArrivalTime(ZonedDateTime.now().minusSeconds(1))
+                .build();
+
         DataStreamSource<SkyOneAirlinesFlightData> skyOneStream = env.fromElements(newSkyOneFlight, oldSkyOneFlight);
+        DataStreamSource<SunsetAirFlightData> sunsetStream = env.fromElements(newSunsetFlight, oldSunsetFlight);
 
         FlightImporterJob
-                .defineWorkflow(skyOneStream)
+                .defineWorkflow(skyOneStream, sunsetStream)
                 .collectAsync(collector);
 
         env.executeAsync();
 
-        assertContains(collector, Arrays.asList(newSkyOneFlight.toFlightData()));
+        assertContains(collector, Arrays.asList(newSkyOneFlight.toFlightData(), newSunsetFlight.toFlightData()));
     }
 }

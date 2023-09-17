@@ -122,6 +122,76 @@ public class TestHelpers {
         }
     }
 
+    public static class SunsetBuilder {
+        private String customerEmailAddress = generateEmail();
+        private ZonedDateTime departureTime = generateDepartureTime();
+        private String departureAirport = generateAirportCode();
+        private ZonedDateTime arrivalTime = generateArrivalTime(departureTime);
+        private String arrivalAirport = generateAirportCode();
+        private String flightId = "SUN"+random.nextInt(1000);
+        private String referenceNumber = "SUN"+generateString(8);
+
+        public SunsetBuilder() {
+            this.customerEmailAddress = generateEmail();
+            this.departureTime = generateDepartureTime();
+            this.departureAirport = generateAirportCode();
+            this.arrivalTime = generateArrivalTime(departureTime);
+            this.arrivalAirport = generateAirportCode();
+            this.flightId = "SUN"+random.nextInt(1000);
+            this.referenceNumber = "SUN"+generateString(8);
+        }
+
+        public SunsetBuilder setCustomerEmailAddress(String customerEmailAddress) {
+            this.customerEmailAddress = customerEmailAddress;
+            return this;
+        }
+
+        public SunsetBuilder setDepartureTime(ZonedDateTime departureTime) {
+            this.departureTime = departureTime;
+            return this;
+        }
+
+        public SunsetBuilder setDepartureAirport(String departureAirport) {
+            this.departureAirport = departureAirport;
+            return this;
+        }
+
+        public SunsetBuilder setArrivalTime(ZonedDateTime arrivalTime) {
+            this.arrivalTime = arrivalTime;
+            return this;
+        }
+
+        public SunsetBuilder setArrivalAirport(String arrivalAirport) {
+            this.arrivalAirport = arrivalAirport;
+            return this;
+        }
+
+        public SunsetBuilder setFlightId(String flightId) {
+            this.flightId = flightId;
+            return this;
+        }
+
+        public SunsetBuilder setReferenceNumber(String referenceNumber) {
+            this.referenceNumber = referenceNumber;
+            return this;
+        }
+
+        public SunsetAirFlightData build() {
+            SunsetAirFlightData sunset = new SunsetAirFlightData();
+
+            sunset.setCustomerEmailAddress(customerEmailAddress);
+            sunset.setDepartureTime(departureTime);
+            sunset.setDepartureAirport(departureAirport);
+            sunset.setArrivalTime(arrivalTime);
+            sunset.setArrivalAirport(arrivalAirport);
+            sunset.setFlightId(flightId);
+            sunset.setReferenceNumber(referenceNumber);
+
+            return sunset;
+        }
+    }
+
+
     public static class FlightDataBuilder {
         private String emailAddress;
         private ZonedDateTime departureTime;
