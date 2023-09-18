@@ -260,4 +260,43 @@ public class TestHelpers {
             return flightData;
         }
     }
+
+    public static class UserStatisticsBuilder {
+        private String emailAddress;
+        private Duration totalFlightDuration;
+        private long numberOfFlights;
+
+        public UserStatisticsBuilder() {
+            this.emailAddress = generateEmail();
+            ZonedDateTime departure = generateDepartureTime();
+            ZonedDateTime arrival = generateArrivalTime(departure);
+            this.totalFlightDuration = Duration.between(departure, arrival);
+            this.numberOfFlights = random.nextInt(5);
+        }
+
+        public UserStatisticsBuilder setEmailAddress(String emailAddress) {
+            this.emailAddress = emailAddress;
+            return this;
+        }
+
+        public UserStatisticsBuilder setTotalFlightDuration(Duration totalFlightDuration) {
+            this.totalFlightDuration = totalFlightDuration;
+            return this;
+        }
+
+        public UserStatisticsBuilder setNumberOfFlights(long numberOfFlights) {
+            this.numberOfFlights = numberOfFlights;
+            return this;
+        }
+
+        public UserStatistics build() {
+            UserStatistics stats = new UserStatistics();
+
+            stats.setEmailAddress(emailAddress);
+            stats.setTotalFlightDuration(totalFlightDuration);
+            stats.setNumberOfFlights(numberOfFlights);
+
+            return stats;
+        }
+    }
 }
