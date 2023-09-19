@@ -24,8 +24,10 @@ import java.util.Properties;
 
 public class UserStatisticsJob {
     public static void main(String[] args) throws Exception {
+        // Flinkの実行環境を設定
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
 
+        // Kafkaのコンシューマーとプロデューサーの設定を読み込む
         Properties consumerConfig = new Properties();
         try (InputStream stream = DataGeneratorJob.class.getClassLoader().getResourceAsStream("consumer.properties")) {
             consumerConfig.load(stream);
@@ -36,6 +38,7 @@ public class UserStatisticsJob {
             producerConfig.load(stream);
         }
 
+        // KafkaからFlightDataを読み取るデータソースを設定
         KafkaSource<FlightData> flightDataSource = KafkaSource.<FlightData>builder()
                 .setProperties(consumerConfig)
                 .setTopics("flightdata")
@@ -43,9 +46,11 @@ public class UserStatisticsJob {
                 .setValueOnlyDeserializer(new JsonDeserializationSchema<>(FlightData.class))
                 .build();
 
+        // FlightDataのデータソースをストリームに接続
         DataStreamSource<FlightData> flightDataStream = env
                 .fromSource(flightDataSource, WatermarkStrategy.forMonotonousTimestamps(), "flightdata_source");
 
+        // UserStatisticsオブジェクトをKafkaにシリアライズする設定を定義
         KafkaRecordSerializationSchema<UserStatistics> statisticsSerializer = KafkaRecordSerializationSchema.<UserStatistics>builder()
                 .setTopic("userstatistics")
                 .setValueSerializationSchema(new JsonSerializationSchema<>(
@@ -53,27 +58,31 @@ public class UserStatisticsJob {
                 ))
                 .build();
 
+        // KafkaへのUserStatisticsデータの書き込みを設定
         KafkaSink<UserStatistics> statsSink = KafkaSink.<UserStatistics>builder()
                 .setKafkaProducerConfig(producerConfig)
                 .setRecordSerializer(statisticsSerializer)
                 .setDeliveryGuarantee(DeliveryGuarantee.AT_LEAST_ONCE)
                 .build();
 
+        // ワークフローを定義し、FlightDataをUserStatisticsに変換し、Kafkaに書き込む
         defineWorkflow(flightDataStream)
                 .sinkTo(statsSink)
                 .name("userstatistics_sink")
                 .uid("userstatistics_sink");
 
+        // Flinkジョブを実行
         env.execute("UserStatistics");
     }
 
+    // ワークフローを定義するメソッド
     public static DataStream<UserStatistics> defineWorkflow(
             DataStream<FlightData> flightDataSource
     ) {
         return flightDataSource
-                .map(UserStatistics::new)
-                .keyBy(UserStatistics::getEmailAddress)
-                .window(TumblingEventTimeWindows.of(Time.minutes(1)))
-                .reduce(UserStatistics::merge);
+                .map(UserStatistics::new) // FlightDataをUserStatisticsに変換
+                .keyBy(UserStatistics::getEmailAddress) // EmailAddressをキーにグループ化
+                .window(TumblingEventTimeWindows.of(Time.minutes(1))) // 1分間のウィンドウを使用
+                .reduce(UserStatistics::merge); // UserStatisticsオブジェクトをマージして結果を生成
     }
 }
